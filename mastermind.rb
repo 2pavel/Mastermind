@@ -3,7 +3,9 @@
 require 'colorize'
 require 'pry'
 
+# This class is used to determine the course of the game
 class Game
+  attr_reader :gamemode
   def initialize
     @chances = 12
     @result = 'win'
@@ -14,32 +16,62 @@ class Game
 
   def play
     @board.set_code
-    p @board.code
+    # p @board.code
     loop do
       puts @board.give_feedback(@player.guess)
       @chances -= 1
       break if @board.win?
+      break if lost?
 
-      if @chances.zero?
-        @result = 'lost'
-        break
-      end
       puts "You have #{@chances} chances remaining."
       print "\n"
     end
     puts "You #{@result}!"
   end
+
+  def lost?
+    @result = 'lost' if @chances.zero?
+  end
+
+  def encrypt
+    @code = @player.ask_for_code
+  end
+
+  def set_mode
+    @gamemode = @player.choose_mode
+  end
 end
 
+# Class used to determine how the user (player)
+# can interact with the program
 class Player
   def guess
     puts 'Enter your guess:'
-    input = gets.chomp.split(' ')
+    input = gets.chomp.downcase.split(' ')
+
+    input
+  end
+
+  def choose_mode
+    puts "Choose game mode by typing \n'guess' if you want to guess the code or\n" \
+    "'encrypt' if you want to set the code for the computer to guess"
+    input = gets.chomp.downcase
+
+    input
+  end
+
+  def ask_for_code
+    puts "\nSet the 4 symbols long code for the computer to crack"
+    puts 'Choose only from the 6 colors listed above'
+    puts "example: red green black green\n\n"
+    input = gets.chomp.downcase.split(' ')
 
     input
   end
 end
 
+# board imitates the game board and game elements (such as pegs)
+# 4 slots for the colored pegs and up to 4 slots for feedback
 class Board
   attr_reader :code, :feedback
   def initialize
@@ -93,4 +125,9 @@ puts 'To exit the game type ' + 'exit'.red.on_white
 print "\n"
 
 game = Game.new
-game.play
+game.set_mode
+if game.gamemode == 'guess'
+  game.play
+else
+  game.encrypt
+end
