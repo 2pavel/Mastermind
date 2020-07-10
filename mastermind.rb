@@ -36,6 +36,14 @@ class Game
   def encrypt
     @code = @player.ask_for_code
     check_input
+    @board.usercode(@code)
+    decrypt
+  end
+
+  def decrypt
+    p @computerguess = %w[red green blue yellow black white].sample(4)
+    puts @board.give_feedback(@computerguess)
+    p @board.code
   end
 
   def check_input
@@ -86,7 +94,8 @@ end
 # board imitates the game board and game elements (such as pegs)
 # 4 slots for the colored pegs and up to 4 slots for feedback
 class Board
-  attr_reader :code, :feedback
+  attr_reader :feedback
+  attr_accessor :code
   def initialize
     @possible_colors = %w[red green blue yellow black white]
     @code = []
@@ -95,6 +104,10 @@ class Board
   def set_code
     4.times { @code << @possible_colors.sample }
     @code
+  end
+
+  def usercode(uc)
+    @code = uc
   end
 
   def give_feedback(guess)
@@ -106,7 +119,7 @@ class Board
 
   # Here we're comparing the guess with the code.
   # White peg means correct guess, red peg means
-  # the given color is in the code but somewhere else.
+  # the given color is in the code but in a different slot.
   def code_check(guess)
     @not_guessed = []
     @code_scan = []
