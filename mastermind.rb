@@ -16,7 +16,7 @@ class Game
 
   def play
     @board.set_code
-    # p @board.code
+    p @board.code
     loop do
       puts @board.give_feedback(@player.guess)
       @chances -= 1
@@ -35,6 +35,19 @@ class Game
 
   def encrypt
     @code = @player.ask_for_code
+    check_input
+  end
+
+  def check_input
+    until (@code.is_a? Array) &&
+          (@code.length == 4) &&
+          (all_colors?(@code) == true)
+      @code = @player.ask_for_code
+    end
+  end
+
+  def all_colors?(code)
+    code.all? { |peg| %w[red green blue yellow black white].include?(peg) }
   end
 
   def set_mode
@@ -48,7 +61,7 @@ class Player
   def guess
     puts 'Enter your guess:'
     input = gets.chomp.downcase.split(' ')
-
+    exit(0) if input == ['exit']
     input
   end
 
@@ -86,6 +99,15 @@ class Board
 
   def give_feedback(guess)
     @feedback = []
+
+    code_check(guess)
+    @feedback.join(' ')
+  end
+
+  # Here we're comparing the guess with the code.
+  # White peg means correct guess, red peg means
+  # the given color is in the code but somewhere else.
+  def code_check(guess)
     @not_guessed = []
     @code_scan = []
 
@@ -103,11 +125,10 @@ class Board
         next unless code_element == color
 
         @feedback << '|'.red
-        color = 'is_somewhere'
+        color = 'is_somewhere_else'
         @code_element = 'checked'
       end
     end
-    @feedback.join(' ')
   end
 
   def win?
