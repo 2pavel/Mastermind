@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# MAIN TESTING EXAMPLE red white blue black
+
 require 'colorize'
 require 'pry'
 
@@ -16,7 +18,6 @@ class Game
 
   def play
     @board.set_code
-    p @board.code
     loop do
       puts @board.give_feedback(@player.guess)
       @chances -= 1
@@ -35,15 +36,38 @@ class Game
 
   def encrypt
     @code = @player.ask_for_code
+    @possible_colors = %w[red green blue yellow black white]
+    @decrypted = Array.new(4) # TUTAJ PA CO WYMYŚLIŁEŚ XDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD
+    p @computer_guess = %w[red red green green]
     check_input
     @board.usercode(@code)
     decrypt
   end
 
   def decrypt
-    p @computerguess = %w[red green blue yellow black white].sample(4)
-    puts @board.give_feedback(@computerguess)
-    p @board.code
+    @chances -= 1
+    puts @board.give_feedback(@computer_guess)
+    analyze_feedback
+    decrypt until @chances.zero?
+  end
+
+  def random_code
+    rnd = []
+    4.times { rnd << @possible_colors.sample }
+    rnd
+  end
+
+  def analyze_feedback
+    @possible_colors -= @computer_guess if @board.feedback == []
+    
+    change_guess
+  end
+
+  def change_guess
+    @computer_guess = random_code
+    @computer_guess = %w[blue blue yellow yellow] if @chances == 11
+    @computer_guess = %w[white white black black] if @chances == 10
+    p @computer_guess
   end
 
   def check_input
@@ -106,8 +130,8 @@ class Board
     @code
   end
 
-  def usercode(uc)
-    @code = uc
+  def usercode(ucd)
+    @code = ucd
   end
 
   def give_feedback(guess)
